@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+import appindicator, gtk
+from daliusb import *
+
+class DaliIndicator(appindicator.Indicator):
+  def __init__(self):
+    appindicator.Indicator.__init__(self, 'dali-indicator', 'dali-usb',
+      appindicator.CATEGORY_HARDWARE)
+    self.set_status(appindicator.STATUS_ACTIVE)
+
+    menu = gtk.Menu()
+    self.info = gtk.MenuItem()
+    self.info.set_sensitive(False)
+    self.info.show()
+    menu.append(self.info)
+    self.set_menu(menu)
+
+    self.adj = gtk.Adjustment(120, 1, 254, 10, 30)
+    self.adj.connect('value-changed', self.adj_value_changed)
+    self.adj.set_value(120) # FIXME: get via dali or gconf
+    self.adj_value_changed(self.adj)
+
+    self.connect('scroll-event', self.scrolled)
+
+  def adj_value_changed(self, adj):
+    find_and_send_cmd(255, int(self.adj.get_value()))
+    self.info.set_label('Current dim level: %i (%.02f%%)' % (self.adj.get_value(), (self.adj.get_value()-1)/253.0*100.0))
+    print self.info.get_label()
+
+  def scrolled(self, ind, delta, direction):
+    if direction == 1: # down
+      self.adj.set_value(self.adj.get_value() - self.adj.get_step_increment())
+    elif direction == 0: # up
+      self.adj.set_value(self.adj.get_value() + self.adj.get_step_increment())
+
+if __name__ == '__main__':
+  ind = DaliIndicator()
+  gtk.main()
