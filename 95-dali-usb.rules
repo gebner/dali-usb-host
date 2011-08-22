@@ -1,0 +1,1 @@
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="05dc", ATTRS{manufacturer}=="2b7e.org", ATTRS{product}=="dali", MODE="0666"
