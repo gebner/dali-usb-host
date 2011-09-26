@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import appindicator, gtk
+import appindicator, gtk, sys
 from daliusb import *
 
 class DaliIndicator(appindicator.Indicator):
@@ -23,7 +23,10 @@ class DaliIndicator(appindicator.Indicator):
     self.connect('scroll-event', self.scrolled)
 
   def adj_value_changed(self, adj):
-    find_and_send_cmd(255, int(self.adj.get_value()))
+    try:
+      find_and_send_cmd(254, int(self.adj.get_value()))
+    except:
+      print sys.exc_info()
     self.info.set_label('Current dim level: %i (%.02f%%)' % (self.adj.get_value(), (self.adj.get_value()-1)/253.0*100.0))
     print self.info.get_label()
 
