@@ -15,16 +15,23 @@ class DaliIndicator(appindicator.Indicator):
     menu.append(self.info)
     self.set_menu(menu)
 
-    self.adj = gtk.Adjustment(120, 1, 254, 10, 30)
+    self.adj = gtk.Adjustment(150, 85, 254, 5, 10)
     self.adj.connect('value-changed', self.adj_value_changed)
-    self.adj.set_value(120) # FIXME: get via dali or gconf
+
+    cur_value = 150
+    res = find_and_send_cmd(255, 160)
+    if res is not None:
+      cur_value = float(res[1])
+    self.adj.set_value(cur_value)
     self.adj_value_changed(self.adj)
 
     self.connect('scroll-event', self.scrolled)
 
   def adj_value_changed(self, adj):
     try:
-      find_and_send_cmd(254, int(self.adj.get_value()))
+      val = int(self.adj.get_value())
+      if val == 85: val = 0
+      find_and_send_cmd(254, val)
     except:
       print sys.exc_info()
     self.info.set_label('Current dim level: %i (%.02f%%)' % (self.adj.get_value(), (self.adj.get_value()-1)/253.0*100.0))

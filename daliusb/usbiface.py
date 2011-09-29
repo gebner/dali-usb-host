@@ -1,4 +1,4 @@
-import usb
+import usb, time, sys
 
 VENDOR_ID = 0x16c0
 PRODUCT_ID = 0x05dc
@@ -21,16 +21,36 @@ def find_dev():
 	  manuf = usb_get_string(devh, dev.iManufacturer)
 	  prod = usb_get_string(devh, dev.iProduct)
 	  if manuf == MANUFACTURER and prod == PRODUCT:
-	    return devh
+	    yield devh
 	except Exception, e:
 	  print e
 
+def send_cmd_msg(devh, addr, cmd):
+  for i in range(3):
+    res = devh.controlMsg(usb.TYPE_VENDOR | usb.RECIP_DEVICE | usb.ENDPOINT_IN, 2, 1, addr | (cmd << 8))[0]
+    if res == 0:
+      return True
+    time.sleep(50e-3)
+  raise 'could not send dali msg'
+
+def send_res_msg(devh):
+  for i in range(3):
+    res = devh.controlMsg(usb.TYPE_VENDOR | usb.RECIP_DEVICE | usb.ENDPOINT_IN, 3, 2, 0)
+    if res[0] & 1:
+      return res
+    time.sleep(30e-3)
+  raise 'did not receive msg result'
+
 def send_cmd(devh, addr, cmd):
-  devh.controlMsg(usb.TYPE_VENDOR | usb.RECIP_DEVICE | usb.ENDPOINT_IN, 2, 0, addr | (cmd << 8))
+  try:
+    send_cmd_msg(devh, addr, cmd)
+    time.sleep(70e-3)
+    return send_res_msg(devh)
+  except:
+    print sys.exc_info()[1]
+    return None
 
 def find_and_send_cmd(addr, cmd):
-  devh = find_dev()
-  if devh is not None:
-    send_cmd(devh, addr, cmd)
-    return True
-  return False
+  for devh in find_dev():
+    return send_cmd(devh, addr, cmd)
+  return None

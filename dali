@@ -4,4 +4,12 @@ import sys
 
 if __name__ == '__main__':
   addr, cmd = map(int, sys.argv[1:])
-  if not find_and_send_cmd(addr, cmd): sys.exit(1)
+  res = find_and_send_cmd(addr, cmd)
+  if res is None:
+    sys.exit(1)
+  elif res[0] == 1:
+    print 'No response received'
+  elif res[0] == 3:
+    print 'Response: {1} ({1:08b})'.format(*res)
+  else:
+    print 'Error receiving response (status={0}, data={1})'.format(*res)
