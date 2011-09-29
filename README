@@ -1,0 +1,14 @@
+Host utilities for the DALI-USB adapter from https://github.com/gebner/dali-usb
+
+Getting started:
+$ git clone https://github.com/gebner/dali-usb-host.git
+$ cd dali-usb-host.git
+# ./setup.py install
+
+$ dali 254 220		  # [broadcast] direct arc power 220
+No response received
+$ dali 255 160		  # [broadcast] QUERY ACTUAL LEVEL
+Response: 220 (11011100)
+
+$ dali-indicator	  # Starts an appindicator.  Scrolling will send
+			  # direct arc power commands to the broadcast address.
