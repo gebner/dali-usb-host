@@ -2,7 +2,7 @@ Host utilities for the DALI-USB adapter from https://github.com/gebner/dali-usb
 
 Getting started:
 $ git clone https://github.com/gebner/dali-usb-host.git
-$ cd dali-usb-host.git
+$ cd dali-usb-host
 # ./setup.py install
 
 $ dali 254 220		  # [broadcast] direct arc power 220
