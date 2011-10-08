@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import appindicator, gtk, sys
+import gobject, dbus
+from dbus.mainloop.glib import DBusGMainLoop
 from daliusb import *
 
 class DaliIndicator(appindicator.Indicator):
@@ -27,6 +29,11 @@ class DaliIndicator(appindicator.Indicator):
 
     self.connect('scroll-event', self.scrolled)
 
+    self.bus = dbus.SystemBus(mainloop = DBusGMainLoop())
+    for signal, handler in {'Sleeping': self.on_suspend, 'Resuming': self.on_resume}.items():
+      self.bus.add_signal_receiver(handler, signal_name=signal,
+	dbus_interface='org.freedesktop.UPower')
+
   def adj_value_changed(self, adj):
     try:
       val = int(self.adj.get_value())
@@ -42,6 +49,13 @@ class DaliIndicator(appindicator.Indicator):
       self.adj.set_value(self.adj.get_value() - self.adj.get_step_increment())
     elif direction == 0: # up
       self.adj.set_value(self.adj.get_value() + self.adj.get_step_increment())
+
+  def on_suspend(self, *args):
+    self.old_value = self.adj.get_value()
+    self.adj.set_value(0)
+
+  def on_resume(self, *args):
+    self.adj.set_value(self.old_value)
 
 if __name__ == '__main__':
   ind = DaliIndicator()
